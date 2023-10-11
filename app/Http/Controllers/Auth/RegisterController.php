@@ -4,11 +4,18 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Repositories\User\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
 {
+    private $userRepository;
+    public function __construct(UserRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(),[
@@ -21,17 +28,12 @@ class RegisterController extends Controller
             return response()->json($validator->errors(),422);
         }  
         
-        $password =  $request->password;
-        $user = new User;
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->password = bcrypt($password);
-        $user->role = $request->role;
-        $user->save();
-
+        $data = $request->all();
+        $result = $this->userRepository->storeUser($data);
+        
         return response()->json([
             'message'=>'User register successfully',
-            'data'=>$user,
+            'data'=>$result,
         ],201);
     }
 }
