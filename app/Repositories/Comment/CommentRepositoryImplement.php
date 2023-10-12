@@ -18,6 +18,26 @@ class CommentRepositoryImplement implements CommentRepository{
     {
         $this->model = $model;
     }
-
-    // Write something awesome :)
+    public function getComment()
+    {
+        return $this->model->all();
+    }
+    public function createComment($data)
+    {
+        return $this->model->create($data);
+    }
+    public function getCommentById($id)
+    {
+        return $this->model->find($id);
+    }
+    public function updateComment($id, array $data)
+    {
+        $comment = $this->model->find($id);
+        $comment->update($data);
+        return $comment;
+    }
+    public function deleteComment($id)
+    {
+        return $this->model->find($id)->delete($id);
+    }
 }

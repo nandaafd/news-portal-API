@@ -6,6 +6,7 @@ use App\Models\News;
 use App\Repositories\News\NewsRepository;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 
 class NewsController extends Controller
@@ -38,7 +39,13 @@ class NewsController extends Controller
             return response()->json($validator->errors(),422);
         }
         $data = $request->all();
-        $result = $this->newsRepository->storeNews($data);
+        if (Gate::allows('admin')) {
+            $result = $this->newsRepository->storeNews($data);
+        }else{
+            return response()->json([
+                'message'=>'Anda tidak memiliki akses'
+            ],403);
+        }
         return response()->json([
             'message'=>'berhasil tambah data',
             'data'=>$result
@@ -48,9 +55,11 @@ class NewsController extends Controller
     public function show($id)
     {
         $result = $this->newsRepository->getNews($id);
+        $comment = $this->newsRepository->getComment($id);
         return response()->json([
             'message'=>'berhasil ambil data',
-            'data'=>$result
+            'data'=>$result,
+            'comment'=>$comment
         ]);
     }
 
@@ -67,7 +76,13 @@ class NewsController extends Controller
             return response()->json($validator->errors(),422);
         }
         $data = $request->all();
-        $result = $this->newsRepository->updateNews($id, $data);
+        if (Gate::allows('admin')) {
+            $result = $this->newsRepository->updateNews($id, $data);
+        }else{
+            return response()->json([
+                'message'=>'Anda tidak memiliki akses'
+            ],403);
+        }
         return response()->json([
             'message'=>'berhasil edit data',
             'data'=>$result
@@ -76,7 +91,13 @@ class NewsController extends Controller
 
     public function destroy(string $id)
     {
-        $result = $this->newsRepository->deleteNews($id);
+        if (Gate::allows('admin')) {
+            $this->newsRepository->deleteNews($id);
+        }else{
+            return response()->json([
+                'message'=>'Anda tidak memiliki akses'
+            ],403);
+        }
         return response()->json([
             'message'=>'data berhasil dihapus',
         ],200);

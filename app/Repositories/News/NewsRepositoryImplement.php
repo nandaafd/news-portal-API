@@ -2,6 +2,7 @@
 
 namespace App\Repositories\News;
 
+use App\Models\Comment;
 use LaravelEasyRepository\Implementations\Eloquent;
 use App\Models\News;
 
@@ -13,10 +14,12 @@ class NewsRepositoryImplement implements NewsRepository{
     * @property Model|mixed $model;
     */
     protected $model;
+    protected $comment;
 
-    public function __construct(News $model)
+    public function __construct(News $model, Comment $comment)
     {
         $this->model = $model;
+        $this->comment = $comment;
     }
     public function getAllNews()
     {
@@ -24,7 +27,11 @@ class NewsRepositoryImplement implements NewsRepository{
     }
     public function getNews($id)
     {
-        return $this->model->where('id',$id)->first();
+        return $this->model->find($id);
+    }
+    public function getComment($id)
+    {
+        return $this->comment->where('news_id',$id)->get();
     }
     public function storeNews($data)
     {
