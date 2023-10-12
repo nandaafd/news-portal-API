@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CommentRequest;
 use App\Jobs\CreateComment;
 use App\Repositories\Comment\CommentRepository;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ class CommentController extends Controller
         ],200);
     }
 
-    public function store(Request $request)
+    public function store(CommentRequest $request)
     {
         $data = $request->all();
         if (Gate::allows('admin')) {
@@ -44,7 +45,7 @@ class CommentController extends Controller
         ]);
     }
 
-    public function update(Request $request, string $id)
+    public function update(CommentRequest $request, string $id)
     {
         $data = $request->all();
         $result = $this->commentRepository->updateComment($id, $data);

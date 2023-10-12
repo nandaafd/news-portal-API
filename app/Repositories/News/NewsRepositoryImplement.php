@@ -33,14 +33,26 @@ class NewsRepositoryImplement implements NewsRepository{
     {
         return $this->comment->where('news_id',$id)->get();
     }
-    public function storeNews($data)
+    public function storeNews($data, $path)
     {
-        return $this->model->create($data);
+        return $this->model->create([
+            'tittle'=>$data['tittle'],
+            'publish_date'=>$data['publish_date'],
+            'writer'=>$data['writer'],
+            'news_text'=>$data['news_text'],
+            'image'=>$path
+        ]);
     }
-    public function updateNews($id, $data)
+    public function updateNews($id, $data, $path)
     {
         $news = $this->model->find($id);
-        $news->update($data);
+        $news->update([
+            'tittle'=>$data['tittle'],
+            'publish_date'=>$data['publish_date'],
+            'writer'=>$data['writer'],
+            'news_text'=>$data['news_text'],
+            'image'=>$path
+        ]);
         return $news;
     }
     public function deleteNews($id)

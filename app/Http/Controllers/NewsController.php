@@ -5,12 +5,10 @@ namespace App\Http\Controllers;
 use App\Events\NewsCreated;
 use App\Events\NewsDeleted;
 use App\Events\NewsUpdated;
-use App\Models\News;
+use App\Http\Requests\NewsRequest;
 use App\Repositories\News\NewsRepository;
-use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class NewsController extends Controller
 {
@@ -29,27 +27,22 @@ class NewsController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(NewsRequest $request)
     {
-        $validator = Validator::make($request->all(),[
-            'tittle'=>'required',
-            'publish_date'=>'required',
-            'writer'=>'required',
-            'news_text'=>'required',
-            'image'=>'file|mimes:jpeg,png'
-        ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors(),422);
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('NewsImage');
+        }else {
+            $path = null;
         }
+
         $data = $request->all();
         if (Gate::allows('admin')) {
-            $news = $this->newsRepository->storeNews($data);
+            $news = $this->newsRepository->storeNews($data, $path);
             event(new NewsCreated($news));
         }else{
-            return response()->json([
-                'message'=>'Anda tidak memiliki akses'
-            ],403);
+            return response()->json(['message'=>'Anda tidak memiliki akses'],403);
         }
+
         return response()->json([
             'message'=>'berhasil tambah data',
             'data'=>$news
@@ -67,27 +60,28 @@ class NewsController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(NewsRequest $request, $id)
     {
-        $validator = Validator::make($request->all(),[
-            'tittle'=>'required',
-            'publish_date'=>'required',
-            'writer'=>'required',
-            'news_text'=>'required',
-            'image'=>'file|mimes:jpeg,png'
-        ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors(),422);
+        $oldImage = $request->oldImage;
+        if ($request->hasFile('newImage')) {
+            if ($request->oldImage) {
+                Storage::delete($oldImage);
+            }
+            $path = $request->file('newImage')->store('NewsImage');
+        }else{
+            $path = $oldImage;
         }
+
         $data = $request->all();
         if (Gate::allows('admin')) {
-            $news = $this->newsRepository->updateNews($id, $data);
+            $news = $this->newsRepository->updateNews($id, $data, $path);
             event(new NewsUpdated($news));
         }else{
             return response()->json([
                 'message'=>'Anda tidak memiliki akses'
             ],403);
         }
+
         return response()->json([
             'message'=>'berhasil edit data',
             'data'=>$news
