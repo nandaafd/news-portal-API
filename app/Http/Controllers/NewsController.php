@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewsCreated;
+use App\Events\NewsDeleted;
+use App\Events\NewsUpdated;
 use App\Models\News;
 use App\Repositories\News\NewsRepository;
 use App\Models\User;
@@ -40,7 +43,8 @@ class NewsController extends Controller
         }
         $data = $request->all();
         if (Gate::allows('admin')) {
-            $result = $this->newsRepository->storeNews($data);
+            $news = $this->newsRepository->storeNews($data);
+            event(new NewsCreated($news));
         }else{
             return response()->json([
                 'message'=>'Anda tidak memiliki akses'
@@ -48,7 +52,7 @@ class NewsController extends Controller
         }
         return response()->json([
             'message'=>'berhasil tambah data',
-            'data'=>$result
+            'data'=>$news
         ],201);
     }
 
@@ -77,7 +81,8 @@ class NewsController extends Controller
         }
         $data = $request->all();
         if (Gate::allows('admin')) {
-            $result = $this->newsRepository->updateNews($id, $data);
+            $news = $this->newsRepository->updateNews($id, $data);
+            event(new NewsUpdated($news));
         }else{
             return response()->json([
                 'message'=>'Anda tidak memiliki akses'
@@ -85,14 +90,15 @@ class NewsController extends Controller
         }
         return response()->json([
             'message'=>'berhasil edit data',
-            'data'=>$result
+            'data'=>$news
         ],200);
     }
 
     public function destroy(string $id)
     {
         if (Gate::allows('admin')) {
-            $this->newsRepository->deleteNews($id);
+            $news = $this->newsRepository->deleteNews($id);
+            event(new NewsDeleted($news));
         }else{
             return response()->json([
                 'message'=>'Anda tidak memiliki akses'
