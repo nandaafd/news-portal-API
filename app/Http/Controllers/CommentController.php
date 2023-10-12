@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\CreateComment;
 use App\Repositories\Comment\CommentRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -25,17 +26,13 @@ class CommentController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
-        if (Gate::allows('user')) {
-            $result = $this->commentRepository->createComment($data);
+        if (Gate::allows('admin')) {
+            dispatch(new CreateComment($data))->onQueue('commentQueue');
         }else{
             return response()->json([
-                'message'=>'Anda tidak memiliki akses'
+                'message'=>'anda tidak memiliki akses',
             ],403);
         }
-        return response()->json([
-            'message'=>'berhasil tambah comment',
-            'data'=>$result
-        ]);
     }
 
     public function show(string $id)
