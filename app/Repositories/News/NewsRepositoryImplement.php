@@ -5,6 +5,7 @@ namespace App\Repositories\News;
 use App\Models\Comment;
 use LaravelEasyRepository\Implementations\Eloquent;
 use App\Models\News;
+use Illuminate\Support\Facades\DB;
 
 class NewsRepositoryImplement implements NewsRepository{
 

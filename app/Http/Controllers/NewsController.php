@@ -7,6 +7,7 @@ use App\Events\NewsDeleted;
 use App\Events\NewsUpdated;
 use App\Http\Requests\NewsRequest;
 use App\Repositories\News\NewsRepository;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
@@ -91,8 +92,10 @@ class NewsController extends Controller
     public function destroy(string $id)
     {
         if (Gate::allows('admin')) {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
             $news = $this->newsRepository->deleteNews($id);
-            event(new NewsDeleted($news));
+            // event(new NewsDeleted($news));
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
         }else{
             return response()->json([
                 'message'=>'Anda tidak memiliki akses'

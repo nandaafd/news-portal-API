@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\NewsLogController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\Route;
         Route::post('logout',[AuthController::class, 'logout']);
         Route::resource('news', NewsController::class);
         Route::resource('comment', CommentController::class);
+        Route::resource('log', NewsLogController::class);
     });
 
 
